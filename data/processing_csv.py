@@ -19,7 +19,9 @@ def worker_task(file_path):
         return f"[ERROR] {file_path}: {e}"
 
 
-def run_parallel_import_pool(year, root_dir="jydata_unzip", num_processes=20):
+def run_parallel_import_pool(
+    year, root_dir="/Volumes/ashare/market_data/jydata_unzip", num_processes=20
+):
     generate_task_list(root_dir, year)
     pending_files = get_pending_tasks()
 
@@ -34,11 +36,13 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--year", required=True, default="2014")
-    parser.add_argument("--works", type=int, default=20)
+    parser.add_argument("--year", default="2014")
+    parser.add_argument("--works", type=int, default=10)
     args = parser.parse_args()
     parser.add_argument(
-        "--root_dir", default="jydata_unzip", help="Root directory for data files"
+        "--root_dir",
+        default="/Volumes/ashare/market_data/jydata_unzip",
+        help="Root directory for data files",
     )
 
     run_parallel_import_pool(args.year, num_processes=args.works)
