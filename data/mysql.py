@@ -26,6 +26,7 @@ class FileProcessor:
 
     def process_csv(self, file_path: str):
         df = pd.read_csv(file_path)
+        code = df["Code"].unique()[0]
         df["datetime"] = pd.to_datetime(
             df["Date"].astype(str) + df["Time"].astype(str).str.zfill(6),
             format="%Y%m%d%H%M%S",
@@ -34,8 +35,20 @@ class FileProcessor:
         df = df[["Open", "High", "Low", "Close", "Volume", "Turnover", "MatchItems"]]
 
         # 表名建议替换掉点
-        code = df["Code"].unique()[0]
+
         table_name = code.lower().replace(".", "_")
-        df.to_sql(name=table_name, con=self.engine, if_exists="append", index=True)
+        df.to_sql(
+            name=table_name,
+            con=self.engine,
+            if_exists="append",
+            index=True,
+            index_label="datetime",
+        )
 
         return f"[OK] {file_path}"
+
+
+if __name__ == "__main__":
+    fp = FileProcessor()
+
+    fp.process_csv("data/ohlc/1m/000001.SH1-1M-20140102-L1.CSV")
