@@ -71,9 +71,9 @@ def build_ui():
             )
         btn = gr.Button("生成图表并导出数据")
         msg_output = gr.Textbox(label="提示信息", interactive=False)
-        file_output = gr.File(label="点击下载当天数据", interactive=False)
-        plot_output = gr.Plot()
 
+        plot_output = gr.Plot()
+        file_output = gr.File(label="点击下载当天数据", interactive=False)
         btn.click(
             show_candlestick,
             inputs=[stock_dropdown, date_picker],
