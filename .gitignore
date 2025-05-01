@@ -32,3 +32,4 @@ result
 */**/*.bz2
 data/ohlc
 data/tmp
+data/task
