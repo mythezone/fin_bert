@@ -23,7 +23,7 @@ def run_parallel_import_pool(
     year, root_dir="/Volumes/ashare/market_data/jydata_unzip", num_processes=20
 ):
     generate_task_list(root_dir, year)
-    pending_files = get_pending_tasks()
+    pending_files = get_pending_tasks(year)
 
     print(f"[INFO] Pending files: {len(pending_files)}")
 

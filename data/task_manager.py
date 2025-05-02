@@ -4,9 +4,9 @@ import pandas as pd
 
 
 def generate_task_list(
-    root_dir: str, year: str, task_file: str = "data/task/task_list.csv"
+    root_dir: str, year: str, task_file: str = "data/task/"
 ):
-
+    task_file = os.path.join(task_file, f"task_list_{year}.csv")
     if os.path.exists(task_file):
         print(f"[INFO] Task list already exists: {task_file}")
         return
@@ -20,9 +20,12 @@ def generate_task_list(
 
 
 def get_pending_tasks(
-    task_file: str = "data/task/task_list.csv",
-    log_file: str = "data/task/completed_log.csv",
+    year: str,
+    task_file: str = "data/task/",
 ):
+    task_file = os.path.join(task_file, f"task_list_{year}.csv")
+    log_file = os.path.join(task_file, f"completed_log_{year}.csv")
+    
     df_all = pd.read_csv(task_file)
 
     if os.path.exists(log_file):
@@ -33,9 +36,9 @@ def get_pending_tasks(
     return pending["file_path"].tolist()
 
 
-def log_completed(file_path: str, log_file: str = "data/task/completed_log.csv"):
+def log_completed(file_path: str,year: str,  task_file: str = "data/task/"):
     import csv
-
+    log_file = os.path.join(task_file, f"completed_log_{year}.csv")
     with open(log_file, "a", newline="") as f:
         writer = csv.writer(f)
         writer.writerow([file_path])
