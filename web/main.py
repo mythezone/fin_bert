@@ -126,5 +126,20 @@ def build_ui():
 
 # 启动
 if __name__ == "__main__":
+    import argparse
+    arg = argparse.ArgumentParser()
+    arg.add_argument(
+        "--server_name",
+        type=str,
+        default="10.16.12.105",
+        help="Server name or IP address to bind the Gradio app.",
+    )
+    arg.add_argument(
+        "--server_port",
+        type=int,
+        default=18889,
+        help="Port number for the Gradio app.",
+    )
+    args = arg.parse_args()
     ui = build_ui()
-    ui.launch(server_name="10.16.12.105",server_port=18889)
+    ui.launch(server_name=args.server_name,server_port=args.server_port)

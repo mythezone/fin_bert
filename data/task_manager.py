@@ -42,4 +42,19 @@ def log_completed(file_path: str, log_file: str = "data/task/completed_log.csv")
 
 
 if __name__ == "__main__":
-    generate_task_list(root_dir="/Volumes/ashare/market_data/jydata_unzip", year="2014")
+    import argparse
+    arg = argparse.ArgumentParser()
+    arg.add_argument(
+        "--root_dir",
+        type=str,
+        default="/app/market_data/jydata_unzip",
+        help="Root directory for the data files.",
+    )
+    arg.add_argument(
+        "--year",
+        type=str,
+        default="2015",
+        help="Year for the data files.",
+    )
+    args = arg.parse_args()
+    generate_task_list(root_dir=args.root_dir, year=args.year)

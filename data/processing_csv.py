@@ -45,4 +45,4 @@ if __name__ == "__main__":
         help="Root directory for data files",
     )
 
-    run_parallel_import_pool(args.year, num_processes=args.works)
+    run_parallel_import_pool(args.year, root_dir=args.root_dir, num_processes=args.works)
