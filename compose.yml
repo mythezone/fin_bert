@@ -1,0 +1,16 @@
+services:
+  fin_bert_web:
+    image: 10.16.12.105:5001/gitlab/jy_data:v0.0.1
+    ports:
+      - "18889:18889"
+    volumes:
+      - .:/app # 可选：开发阶段挂载当前代码
+    environment:
+      - PYTHONUNBUFFERED=1
+    working_dir: /app
+    networks:
+      - docker_network
+
+networks:
+  docker_network:
+    external: true

@@ -4,6 +4,9 @@ import gradio as gr
 import plotly.graph_objects as go
 from sqlalchemy import inspect, text
 from dotenv import load_dotenv
+
+import sys 
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '../')))
 from data.mysql import create_mysql_engine
 
 # Load DB config
@@ -75,60 +78,6 @@ def show_candlestick(stock_table, date_str):
     )
     return "", fig, file_path
 
-    # 构建 Gradio 界面
-    # def build_ui():
-    #     stock_list = get_stock_table_names()
-
-    #     with gr.Blocks() as demo:
-    #         gr.Markdown("### 📈 股票分钟级 OHLC 蜡烛图可视化")
-
-    #         with gr.Row():
-    #             stock_dropdown = gr.Dropdown(choices=stock_list, label="选择股票（表名）")
-    #             date_picker = gr.Textbox(
-    #                 label="输入日期 (格式: YYYY-MM-DD)", placeholder="如：2014-04-23"
-    #             )
-    #         btn = gr.Button("生成图表并导出数据")
-    #         plot_output = gr.Plot()
-    #         msg_output = gr.Textbox(label="提示信息", interactive=False)
-
-    #         # 按钮：生成图表 + 导出当日
-    #         btn_daily = gr.Button("生成图表并导出当天数据")
-    #         btn_daily.click(
-    #             show_candlestick,
-    #             inputs=[stock_dropdown, date_picker],
-    #             outputs=[msg_output, plot_output, gr.File.update(), gr.File.update()],
-    #         )
-
-    #         # 每日导出按钮 + 文件下载控件
-    #         with gr.Row():
-    #             download_daily_file = gr.File(label="下载当天数据", interactive=True)
-    #             btn_daily_export = gr.Button("导出当天数据（仅文件）")
-
-    #         btn_daily_export.click(
-    #             show_candlestick,
-    #             inputs=[stock_dropdown, date_picker],
-    #             outputs=[msg_output, gr.Plot.update(), download_daily_file],
-    #         )
-
-    #         # 全部导出按钮 + 文件下载控件
-    #         with gr.Row():
-    #             download_full_file = gr.File(label="下载全部数据", interactive=True)
-    #             btn_full_export = gr.Button("导出全部数据")
-
-    #         btn_full_export.click(
-    #             export_all_data_for_stock,
-    #             inputs=[stock_dropdown],
-    #             outputs=[msg_output, download_full_file],
-    #         )
-    # file_output = gr.File(label="点击下载当天数据", interactive=False)
-    # btn.click(
-    #     show_candlestick,
-    #     inputs=[stock_dropdown, date_picker],
-    #     outputs=[msg_output, plot_output, file_output],
-    # )
-
-    return demo
-
 
 def build_ui():
     stock_list = get_stock_table_names()
@@ -178,4 +127,4 @@ def build_ui():
 # 启动
 if __name__ == "__main__":
     ui = build_ui()
-    ui.launch()
+    ui.launch(server_name="10.16.12.105",server_port=18889)
