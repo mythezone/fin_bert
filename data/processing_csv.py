@@ -38,11 +38,12 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--year", default="2014")
     parser.add_argument("--works", type=int, default=10)
-    args = parser.parse_args()
     parser.add_argument(
         "--root_dir",
         default="/Volumes/ashare/market_data/jydata_unzip",
         help="Root directory for data files",
     )
 
+    args = parser.parse_args()
+    
     run_parallel_import_pool(args.year, root_dir=args.root_dir, num_processes=args.works)
