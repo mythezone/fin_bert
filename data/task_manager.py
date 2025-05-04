@@ -5,7 +5,7 @@ import pandas as pd
 
 def generate_task_list(
     root_dir: str, year: str, task_file: str = "data/task/"
-):
+,save: bool = True):
     task_file = os.path.join(task_file, f"task_list_{year}.csv")
     if os.path.exists(task_file):
         print(f"[INFO] Task list already exists: {task_file}")
@@ -15,8 +15,10 @@ def generate_task_list(
     all_files = glob.glob(pattern, recursive=True)
 
     df = pd.DataFrame({"file_path": all_files})
-    df.to_csv(task_file, index=False)
-    print(f"[INFO] Task list generated with {len(df)} entries.")
+    if save:
+        df.to_csv(task_file, index=False)
+        print(f"[INFO] Task list generated with {len(df)} entries.")
+    return df 
 
 
 def get_pending_tasks(
