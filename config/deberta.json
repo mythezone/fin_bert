@@ -1,0 +1,14 @@
+{
+    "dataset_name": "mythezone/financial-corpus-a-share",
+    "tokenizer_path": "data/tokenized/financial_tokenizer.json",
+    "max_seq_length": 32,
+    "model_type": "deberta",
+    "max_position_embeddings": 32,
+    "hidden_size": 256,
+    "num_hidden_layers": 8,
+    "num_attention_heads": 8,
+    "batch_size": 64,
+    "num_train_epochs": 10,
+    "run_name": "[A5000]deberta",
+    "output_dir": "output/fin-bert-mlm/deberta"
+}

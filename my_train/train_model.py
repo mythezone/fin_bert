@@ -1,12 +1,13 @@
 import json
 import os
 from dotenv import load_dotenv
+
 load_dotenv()
 # os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["COMET_API_KEY"] = "yJJTSjgwXMbbO1FgvP5gxNLWr"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
-import comet_ml 
+import comet_ml
 from datasets import load_dataset, DatasetDict
 from transformers import (
     PreTrainedTokenizerFast,
@@ -23,6 +24,7 @@ from transformers import (
     Trainer,
 )
 
+
 class ModelTrainer:
     def __init__(self, config_path):
         with open(config_path, "r") as f:
@@ -31,7 +33,7 @@ class ModelTrainer:
         self.tokenizer = PreTrainedTokenizerFast(
             tokenizer_file=self.cfg["tokenizer_path"]
         )
-        
+
         self.tokenizer.add_special_tokens(
             {
                 "pad_token": "[PAD]",
@@ -42,13 +44,17 @@ class ModelTrainer:
             }
         )
         self.vocab_size = len(self.tokenizer)
-        
+
         self.dataset = load_dataset(self.cfg["dataset_name"], split="train")
         self.dataset = DatasetDict(self._split_dataset())
 
         self.tokenized = self.dataset.map(
             self._tokenize_fn, batched=True, remove_columns=["id", "text"]
         )
+
+    def load_config(self, config_path):
+        with open(config_path, "r") as f:
+            self.cfg = json.load(f)
 
     def _split_dataset(self):
         split = self.dataset.train_test_split(test_size=0.1, seed=42)
@@ -78,7 +84,7 @@ class ModelTrainer:
             "dataloader_num_workers": 0,
         }
         if model_type == "bert":
-            config = BertConfig(type_vocab_size=2,  **common_args)
+            config = BertConfig(type_vocab_size=2, **common_args)
             return BertForMaskedLM(config)
         elif model_type == "roberta":
             config = RobertaConfig(type_vocab_size=1, **common_args)
@@ -91,9 +97,7 @@ class ModelTrainer:
             return DistilBertForMaskedLM(config)
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
-        
-    
-    
+
     def check_all_token_ids(self):
         print("🔍 Checking all token IDs in training set...")
         for i, example in enumerate(self.tokenized["train"]):
@@ -119,18 +123,17 @@ class ModelTrainer:
             learning_rate=2e-5,
             warmup_steps=500,
             weight_decay=0.01,
-            fp16=True,
-            ddp_find_unused_parameters=False
+            ddp_find_unused_parameters=False,
         )
         collator = DataCollatorForLanguageModeling(
             tokenizer=self.tokenizer, mlm=True, mlm_probability=0.15
         )
+
         def model_init():
             model = self._init_model()
             model.resize_token_embeddings(len(self.tokenizer))
             return model
-        
-        
+
         trainer = Trainer(
             model=model_init(),
             args=args,
@@ -142,7 +145,6 @@ class ModelTrainer:
         # if torch.cuda.device_count() > 1:
         #     self.model = torch.nn.DataParallel(self.model)
 
-        
         trainer.train()
         trainer.save_model(self.cfg["output_dir"])
 
@@ -175,18 +177,9 @@ class ModelTrainer:
 
 
 if __name__ == "__main__":
-    import argparse
-
-    parser = argparse.ArgumentParser()
-    parser.add_argument("--config_path", type=str, default="config/train_args.json")
-    parser.add_argument(
-        "--mode", type=str, choices=["train", "evaluate"], default="train"
-    )
-    args = parser.parse_args()
-
-    trainer = ModelTrainer(args.config_path)
-    if args.mode == "train":
-        
+    config_folder = "./config"
+    config_files = [c for c in os.listdir(config_folder) if c.endswith(".json")]
+    for config_file in config_files:
+        config_path = os.path.join(config_folder, config_file)
+        trainer = ModelTrainer(config_path)
         trainer.train()
-    else:
-        trainer.evaluate()
