@@ -34,3 +34,6 @@ data/ohlc
 data/tmp
 data/task
 mlruns
+*/**/*.pkl
+data/tokenized
+output 
