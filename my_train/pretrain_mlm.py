@@ -8,7 +8,7 @@ from transformers import (
     Trainer,
     TrainingArguments,
 )
-from datasets import load_dataset
+from datasets import load_dataset, DatasetDict
 import os
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
@@ -55,7 +55,7 @@ def main():
     }
     tokenizer.add_special_tokens(special_tokens)
 
-    from datasets import DatasetDict
+
 
     # Load dataset
     dataset = load_dataset(args.dataset_name, split="train")

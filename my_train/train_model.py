@@ -1,6 +1,10 @@
 import json
 import os
-from datasets import load_dataset
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["COMET_API_KEY"] = "yJJTSjgwXMbbO1FgvP5gxNLWr"
+
+import comet_ml 
+from datasets import load_dataset, DatasetDict
 from transformers import (
     PreTrainedTokenizerFast,
     BertConfig,
@@ -15,7 +19,6 @@ from transformers import (
     TrainingArguments,
     Trainer,
 )
-
 
 class ModelTrainer:
     def __init__(self, config_path):
@@ -35,14 +38,15 @@ class ModelTrainer:
             }
         )
 
-        self.dataset = load_dataset(self.cfg["dataset_name"], split="train")
-        self.dataset = self._split_dataset()
+        self.dataset = load_dataset("json", data_files=self.cfg["dataset_name"], split="train")
+        self.dataset = DatasetDict(self._split_dataset())
 
         self.tokenized = self.dataset.map(
             self._tokenize_fn, batched=True, remove_columns=["id", "text"]
         )
 
         self.model = self._init_model()
+        
         self.model.resize_token_embeddings(len(self.tokenizer))
 
     def _split_dataset(self):
@@ -90,14 +94,18 @@ class ModelTrainer:
         args = TrainingArguments(
             output_dir=self.cfg["output_dir"],
             overwrite_output_dir=True,
-            evaluation_strategy="epoch",
+            eval_strategy="epoch",
             per_device_train_batch_size=self.cfg.get("batch_size", 32),
             num_train_epochs=self.cfg.get("num_train_epochs", 5),
             save_strategy="epoch",
             logging_dir=os.path.join(self.cfg["output_dir"], "logs"),
             logging_steps=100,
-            report_to=["mlflow", "comet"],
+            report_to=["mlflow", "comet_ml"],
             run_name=self.cfg.get("run_name", "finbert-run"),
+            learning_rate=2e-5,
+            warmup_steps=500,
+            weight_decay=0.01,
+            fp16=True
         )
         collator = DataCollatorForLanguageModeling(
             tokenizer=self.tokenizer, mlm=True, mlm_probability=0.15
@@ -144,7 +152,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser()
-    parser.add_argument("--config_path", type=str, required=True)
+    parser.add_argument("--config_path", type=str, default="config/train_args.json")
     parser.add_argument(
         "--mode", type=str, choices=["train", "evaluate"], default="train"
     )
