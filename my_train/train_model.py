@@ -1,7 +1,10 @@
 import json
 import os
-os.environ["TOKENIZERS_PARALLELISM"] = "false"
+from dotenv import load_dotenv
+load_dotenv()
+# os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["COMET_API_KEY"] = "yJJTSjgwXMbbO1FgvP5gxNLWr"
+# os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
 import comet_ml 
 from datasets import load_dataset, DatasetDict
@@ -28,6 +31,7 @@ class ModelTrainer:
         self.tokenizer = PreTrainedTokenizerFast(
             tokenizer_file=self.cfg["tokenizer_path"]
         )
+        
         self.tokenizer.add_special_tokens(
             {
                 "pad_token": "[PAD]",
@@ -37,17 +41,14 @@ class ModelTrainer:
                 "unk_token": "[UNK]",
             }
         )
-
-        self.dataset = load_dataset("json", data_files=self.cfg["dataset_name"], split="train")
+        self.vocab_size = len(self.tokenizer)
+        
+        self.dataset = load_dataset(self.cfg["dataset_name"], split="train")
         self.dataset = DatasetDict(self._split_dataset())
 
         self.tokenized = self.dataset.map(
             self._tokenize_fn, batched=True, remove_columns=["id", "text"]
         )
-
-        self.model = self._init_model()
-        
-        self.model.resize_token_embeddings(len(self.tokenizer))
 
     def _split_dataset(self):
         split = self.dataset.train_test_split(test_size=0.1, seed=42)
@@ -69,14 +70,15 @@ class ModelTrainer:
     def _init_model(self):
         model_type = self.cfg["model_type"]
         common_args = {
-            "vocab_size": self.cfg["vocab_size"],
+            "vocab_size": self.vocab_size,
             "max_position_embeddings": self.cfg["max_position_embeddings"],
             "hidden_size": self.cfg["hidden_size"],
             "num_hidden_layers": self.cfg["num_hidden_layers"],
             "num_attention_heads": self.cfg["num_attention_heads"],
+            "dataloader_num_workers": 0,
         }
         if model_type == "bert":
-            config = BertConfig(type_vocab_size=2, **common_args)
+            config = BertConfig(type_vocab_size=2,  **common_args)
             return BertForMaskedLM(config)
         elif model_type == "roberta":
             config = RobertaConfig(type_vocab_size=1, **common_args)
@@ -89,6 +91,18 @@ class ModelTrainer:
             return DistilBertForMaskedLM(config)
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
+        
+    
+    
+    def check_all_token_ids(self):
+        print("🔍 Checking all token IDs in training set...")
+        for i, example in enumerate(self.tokenized["train"]):
+            for j, t in enumerate(example["input_ids"]):
+                if not isinstance(t, int) or t < 0 or t >= self.vocab_size:
+                    print(f"[ERROR] sample #{i} token #{j} = {t} ❌")
+                    print("input_ids:", example["input_ids"])
+                    raise ValueError("Invalid token ID detected")
+        print("✅ All token IDs are valid.")
 
     def train(self):
         args = TrainingArguments(
@@ -105,18 +119,30 @@ class ModelTrainer:
             learning_rate=2e-5,
             warmup_steps=500,
             weight_decay=0.01,
-            fp16=True
+            fp16=True,
+            ddp_find_unused_parameters=False
         )
         collator = DataCollatorForLanguageModeling(
             tokenizer=self.tokenizer, mlm=True, mlm_probability=0.15
         )
+        def model_init():
+            model = self._init_model()
+            model.resize_token_embeddings(len(self.tokenizer))
+            return model
+        
+        
         trainer = Trainer(
-            model=self.model,
+            model=model_init(),
             args=args,
             train_dataset=self.tokenized["train"],
             eval_dataset=self.tokenized["eval"],
             data_collator=collator,
         )
+
+        # if torch.cuda.device_count() > 1:
+        #     self.model = torch.nn.DataParallel(self.model)
+
+        
         trainer.train()
         trainer.save_model(self.cfg["output_dir"])
 
@@ -160,6 +186,7 @@ if __name__ == "__main__":
 
     trainer = ModelTrainer(args.config_path)
     if args.mode == "train":
+        
         trainer.train()
     else:
         trainer.evaluate()
