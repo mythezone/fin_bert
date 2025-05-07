@@ -2,7 +2,11 @@ from data.mysql import FileProcessor
 
 
 import multiprocessing
-from task_manager import generate_task_list, get_pending_tasks, log_completed
+from data.preprocess.task_manager import (
+    generate_task_list,
+    get_pending_tasks,
+    log_completed,
+)
 
 
 def worker_init():
@@ -46,5 +50,7 @@ if __name__ == "__main__":
     )
 
     args = parser.parse_args()
-    
-    run_parallel_import_pool(year=args.year, root_dir=args.root_dir, num_processes=args.works)
+
+    run_parallel_import_pool(
+        year=args.year, root_dir=args.root_dir, num_processes=args.works
+    )

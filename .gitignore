@@ -30,10 +30,10 @@ old
 result
 */**/*.bgz
 */**/*.bz2
-data/ohlc
-data/tmp
-data/task
+
 mlruns
 */**/*.pkl
-data/tokenized
+
 output 
+
+dataset/
