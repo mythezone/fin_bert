@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-# os.environ["TOKENIZERS_PARALLELISM"] = "false"
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["COMET_API_KEY"] = "yJJTSjgwXMbbO1FgvP5gxNLWr"
 # os.environ["CUDA_LAUNCH_BLOCKING"] = "1"
 
