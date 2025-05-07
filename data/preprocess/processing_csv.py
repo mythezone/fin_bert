@@ -1,4 +1,4 @@
-from data.mysql import FileProcessor
+from data.database.mysql import FileProcessor
 
 
 import multiprocessing
