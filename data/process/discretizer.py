@@ -16,17 +16,6 @@ class Discretizer:
     def set_bucketizer(self, bucketizer: Bucketizer):
         self.bucketizer = bucketizer
 
-    # def encode_ohlc(self, open_pct, high_pct, low_pct, close_pct) -> List[int]:
-    #     self.encoded_df = pd.DataFrame(
-    #         {
-    #             "open_pct": self.bucketizer.encode(open_pct),
-    #             "high_pct": self.bucketizer.encode(high_pct),
-    #             "low_pct": self.bucketizer.encode(low_pct),
-    #             "close_pct": self.bucketizer.encode(close_pct),
-    #         }
-    #     )
-    #     return self.encoded_df
-
     def encode_df(self, df):
 
         self.encoded_df = pd.DataFrame(
