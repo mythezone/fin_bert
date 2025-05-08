@@ -3,6 +3,11 @@ from collections import Counter
 import pandas as pd
 
 
+def hex_to_int(h: str) -> int:
+    u = int(h, 16)
+    return u - 256 if u >= 128 else u
+
+
 def analyze_corpus_statistics(corpus_path: str):
     """
     Load a pickled corpus and compute statistics:
@@ -12,10 +17,13 @@ def analyze_corpus_statistics(corpus_path: str):
     - Per-position token frequency (open, high, low, close) with bar plots
     - Number of unique 2-grams
     """
-    corpus_df = pd.read_pickle(corpus_path)
+    # corpus_df = pd.read_pickle(corpus_path)
+    with open(corpus_path, "r") as f:
+        corpus_df = f.readlines()
+
     all_tokens = []
-    for tokens_list in corpus_df["text"]:
-        all_tokens.extend(tokens_list)
+    for tokens_list in corpus_df:
+        all_tokens.extend(tokens_list.split(" "))
 
     total_words = len(all_tokens)
     unique_words = len(set(all_tokens))
@@ -26,10 +34,10 @@ def analyze_corpus_statistics(corpus_path: str):
     print(f"Unique ratio: {unique_ratio:.4f}")
 
     # Separate tokens by position (open, high, low, close)
-    open_tokens = [token[0] for token in all_tokens]
-    high_tokens = [token[1] for token in all_tokens]
-    low_tokens = [token[2] for token in all_tokens]
-    close_tokens = [token[3] for token in all_tokens]
+    open_tokens = [hex_to_int(token[:2]) for token in all_tokens]
+    high_tokens = [hex_to_int(token[2:4]) for token in all_tokens]
+    low_tokens = [hex_to_int(token[4:6]) for token in all_tokens]
+    close_tokens = [hex_to_int(token[6:]) for token in all_tokens]
 
     positions = ["Open", "High", "Low", "Close"]
     tokens_by_position = [open_tokens, high_tokens, low_tokens, close_tokens]
@@ -48,10 +56,10 @@ def analyze_corpus_statistics(corpus_path: str):
         plt.tight_layout()
         plt.show()
 
-    # Count unique 2-grams
-    two_grams = []
-    for tokens_list in corpus_df["text"]:
-        for i in range(len(tokens_list) - 1):
-            two_grams.append((tokens_list[i], tokens_list[i + 1]))
-    unique_two_grams = len(set(two_grams))
-    print(f"Number of unique 2-grams: {unique_two_grams}")
+    # # Count unique 2-grams
+    # two_grams = []
+    # for tokens_list in corpus_df["text"]:
+    #     for i in range(len(tokens_list) - 1):
+    #         two_grams.append((tokens_list[i], tokens_list[i + 1]))
+    # unique_two_grams = len(set(two_grams))
+    # print(f"Number of unique 2-grams: {unique_two_grams}")
