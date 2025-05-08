@@ -1,10 +1,11 @@
 from typing import List, Tuple
 import numpy as np
 from abc import ABC, abstractmethod
+import pandas as pd
 
 
 class Bucketizer(ABC):
-    def __init__(self, k: int):
+    def __init__(self, k: int = 10):
         self.k = k
         self.num_bins = 2 * k + 1
         self.lower = -0.10  # -10%
@@ -149,3 +150,88 @@ class ExponentialBucketizer(Bucketizer):
                 return np.random.uniform(start, end)
             else:
                 raise ValueError("mode must be 'mean' or 'random'")
+
+
+class QuantileBucketizer(Bucketizer):
+
+    def __init__(
+        self,
+        k: int,
+        df: pd.DataFrame,
+        cols: List[str] = ["open_pct", "high_pct", "low_pct", "close_pct"],
+    ):
+        if cols:
+            count_df = df[cols].dropna()
+        else:
+            count_df = df
+
+        quantiles = np.percentile(count_df, np.linspace(0, 100, 2 * k + 2))
+
+        self.quantiles = smooth_duplicate_quantiles(quantiles)
+        super().__init__(k)
+        self.boundaries = quantiles
+
+    def encode(self, value):
+        # Accepts scalar or np.ndarray
+        arr = np.asarray(value)
+        # The bins are defined by self.boundaries, which has length 2k+2, so 2k+1 bins
+        idx = np.searchsorted(self.boundaries, arr, side="right") - 1
+        # idx in [0, 2k], so output in [-k, k]
+        idx = np.clip(idx, 0, len(self.boundaries) - 2)
+        result = idx - self.k
+        if np.isscalar(value):
+            return int(result)
+        return result
+
+    def decode(self, index, mode: str = "mean"):
+        # Accepts scalar or np.ndarray
+        arr = np.asarray(index)
+        start = self.boundaries[arr + self.k]
+        end = self.boundaries[arr + self.k + 1]
+        if mode == "mean":
+            result = (start + end) / 2
+        elif mode == "random":
+            result = np.random.uniform(start, end)
+        else:
+            raise ValueError("mode must be 'mean' or 'random'")
+        if np.isscalar(index):
+            return float(result)
+        return result
+
+
+#  Supporting functions
+def smooth_duplicate_quantiles(quantiles: np.ndarray, eps: float = 1e-12) -> np.ndarray:
+    """
+    修复 quantiles 中的重复边界值：
+    将任何相邻的重复值用该区间前后值平均分成三段中的中间两段填充。
+
+    参数:
+        quantiles: 原始分位数组 (1D numpy array)
+        eps: 判断重复值的最小差值阈值
+
+    返回:
+        新的 quantiles 数组，已无连续重复值
+    """
+    q = quantiles.copy()
+    i = 1
+    while i < len(q) - 1:
+        if abs(q[i] - q[i - 1]) < eps and abs(q[i + 1] - q[i]) < eps:
+            # 三个相等（或近似相等）值：q[i-1] == q[i] == q[i+1]
+            # 用前后一个非重复区间替代中间两个点
+            left = q[i - 2] if i >= 2 else q[i - 1] - 1e-6
+            right = q[i + 2] if i + 2 < len(q) else q[i + 1] + 1e-6
+            step = (right - left) / 3
+            q[i - 1] = left + step
+            q[i] = left + 2 * step
+            i += 2
+        elif abs(q[i] - q[i - 1]) < eps:
+            # 单个重复值（两个相等）
+            left = q[i - 2] if i >= 2 else q[i - 1] - 1e-6
+            right = q[i + 1] if i + 1 < len(q) else q[i] + 1e-6
+            step = (right - left) / 3
+            q[i - 1] = left + step
+            q[i] = left + 2 * step
+            i += 1
+        else:
+            i += 1
+    return q

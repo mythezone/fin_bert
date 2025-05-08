@@ -1,0 +1,29 @@
+{
+    "name": "standard",
+    "data_path": "dataset/pickled/daily_df.pkl",
+    "bucketizer": {
+        "type": "exp",
+        "params": {
+            "k": 20,
+            "e": 1.2,
+            "zero": 2.0e-4
+        }
+    },
+    "percentager": {
+        "type": "std",
+        "params": {}
+    },
+    "discretizer": {
+        "type": "std",
+        "params": {}
+    },
+    "corpus_builder": {
+        "type": "std",
+        "params": {
+            "out_dir": "dataset/pickled",
+            "stride": 5,
+            "segment_length": 22
+        }
+    },
+    "debug": true
+}
