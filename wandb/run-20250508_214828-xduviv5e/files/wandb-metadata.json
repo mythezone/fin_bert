@@ -1,0 +1,44 @@
+{
+  "os": "macOS-15.4.1-arm64-arm-64bit-Mach-O",
+  "python": "CPython 3.13.2",
+  "startedAt": "2025-05-08T13:48:28.129544Z",
+  "program": "/Users/mythezone/project/python/fin_bert/train/train_bert.ipynb",
+  "codePath": "train/train_bert.ipynb",
+  "git": {
+    "remote": "https://github.com/mythezone/fin_bert.git",
+    "commit": "5d46b3ea641e0f7f09489d8665ac504ab7f9b417"
+  },
+  "email": "125616515@qq.com",
+  "root": "/Users/mythezone/project/python/fin_bert",
+  "host": "Mythezones-Mac-mini-M4.local",
+  "executable": "/Users/mythezone/miniconda3/envs/hf/bin/python",
+  "codePathLocal": "train/train_bert.ipynb",
+  "cpu_count": 10,
+  "cpu_count_logical": 10,
+  "disk": {
+    "/": {
+      "total": "1995218165760",
+      "used": "1040167464960"
+    },
+    "/System/Volumes/Data": {
+      "total": "1995218165760",
+      "used": "1040167464960"
+    }
+  },
+  "memory": {
+    "total": "17179869184"
+  },
+  "cpu": {
+    "count": 10,
+    "countLogical": 10
+  },
+  "apple": {
+    "name": "Apple M4",
+    "ecpuCores": 6,
+    "pcpuCores": 4,
+    "gpuCores": 10,
+    "memoryGb": 16,
+    "swapTotalBytes": "4294967296",
+    "ramTotalBytes": "17179869184"
+  }
+}
