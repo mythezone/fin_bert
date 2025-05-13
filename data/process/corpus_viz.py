@@ -18,7 +18,7 @@ def analyze_corpus_statistics(corpus_path: str):
     - Number of unique 2-grams
     """
     # corpus_df = pd.read_pickle(corpus_path)
-    with open(corpus_path, "r") as f:
+    with open(corpus_path, "r", encoding="utf-8") as f:
         corpus_df = f.readlines()
 
     all_tokens = []
