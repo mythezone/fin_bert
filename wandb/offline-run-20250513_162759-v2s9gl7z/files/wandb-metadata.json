@@ -1,0 +1,65 @@
+{
+  "os": "Linux-6.8.0-59-generic-x86_64-with-glibc2.39",
+  "python": "CPython 3.13.2",
+  "startedAt": "2025-05-13T08:27:59.889923Z",
+  "program": "/home/zhongmuyao/project/github/fin_bert/pre_train/run.py",
+  "codePath": "pre_train/run.py",
+  "git": {
+    "remote": "https://github.com/mythezone/fin_bert.git",
+    "commit": "9d7dec21db1c03c69326a32f135537e437cc9cdf"
+  },
+  "root": "/home/zhongmuyao/project/github/fin_bert",
+  "host": "LC1",
+  "executable": "/home/zhongmuyao/miniconda3/envs/hf/bin/python",
+  "codePathLocal": "pre_train/run.py",
+  "cpu_count": 24,
+  "cpu_count_logical": 48,
+  "gpu": "NVIDIA RTX 5880 Ada Generation",
+  "gpu_count": 5,
+  "disk": {
+    "/": {
+      "total": "909668036608",
+      "used": "49294462976"
+    }
+  },
+  "memory": {
+    "total": "270074621952"
+  },
+  "cpu": {
+    "count": 24,
+    "countLogical": 48
+  },
+  "gpu_nvidia": [
+    {
+      "name": "NVIDIA RTX 5880 Ada Generation",
+      "memoryTotal": "51527024640",
+      "cudaCores": 14080,
+      "architecture": "Ada"
+    },
+    {
+      "name": "NVIDIA RTX 5880 Ada Generation",
+      "memoryTotal": "51527024640",
+      "cudaCores": 14080,
+      "architecture": "Ada"
+    },
+    {
+      "name": "NVIDIA RTX 5880 Ada Generation",
+      "memoryTotal": "51527024640",
+      "cudaCores": 14080,
+      "architecture": "Ada"
+    },
+    {
+      "name": "NVIDIA RTX 6000 Ada Generation",
+      "memoryTotal": "51527024640",
+      "cudaCores": 18176,
+      "architecture": "Ada"
+    },
+    {
+      "name": "NVIDIA RTX 6000 Ada Generation",
+      "memoryTotal": "51527024640",
+      "cudaCores": 18176,
+      "architecture": "Ada"
+    }
+  ],
+  "cudaVersion": "12.8"
+}

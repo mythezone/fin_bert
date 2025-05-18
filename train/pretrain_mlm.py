@@ -8,13 +8,25 @@ from transformers import (
     Trainer,
     TrainingArguments,
 )
-from datasets import load_dataset, DatasetDict
+from datasets import load_dataset, DatasetDict, load_from_disk
 import os
 
 os.environ["TOKENIZERS_PARALLELISM"] = "false"
 os.environ["COMET_API_KEY"] = "yJJTSjgwXMbbO1FgvP5gxNLWr"
 
 # print(TrainingArguments.__module__)
+
+
+tokenizer = PreTrainedTokenizerFast(
+    tokenizer_file="dataset/tokenizer/wp_tokenizer.json"
+)
+
+# 显式注册特殊 token
+tokenizer.pad_token = "[PAD]"
+tokenizer.cls_token = "[CLS]"  # 如果有的话
+tokenizer.sep_token = "[SEP]"  # 如果有的话
+tokenizer.mask_token = "[MASK]"  # 如果用于MLM，建议定义
+tokenizer.unk_token = "[UNK]"
 
 
 def tokenize_function(examples, tokenizer, max_seq_length):
@@ -56,25 +68,26 @@ def main():
     }
     tokenizer.add_special_tokens(special_tokens)
 
-
-
     # Load dataset
     dataset = load_dataset(args.dataset_name, split="train")
-    # Split into train/eval/test
-    dataset = dataset.train_test_split(test_size=0.1, seed=42)
-    test_valid_split = dataset["test"].train_test_split(test_size=0.5, seed=42)
-    dataset_dict = DatasetDict(
-        {
-            "train": dataset["train"],
-            "eval": test_valid_split["train"],
-            "test": test_valid_split["test"],
-        }
-    )
 
-    tokenized_dataset = dataset_dict.map(
+    tokenized_dataset = dataset.map(
         lambda x: tokenize_function(x, tokenizer, args.max_seq_length),
         batched=True,
         remove_columns=["id", "text"],
+    )
+
+    from datasets import DatasetDict
+
+    # 拆分验证集和测试集
+    split_dataset = tokenized_dataset.train_test_split(test_size=0.2, seed=42)
+    valid_test_split = split_dataset["test"].train_test_split(test_size=0.5, seed=42)
+    tokenized_dataset = DatasetDict(
+        {
+            "train": split_dataset["train"],
+            "valid": valid_test_split["train"],
+            "test": valid_test_split["test"],
+        }
     )
 
     # Build model config
@@ -114,10 +127,10 @@ def main():
         model=model,
         args=training_args,
         train_dataset=tokenized_dataset["train"],
-        eval_dataset=tokenized_dataset["eval"],
+        eval_dataset=tokenized_dataset["valid"],
         data_collator=data_collator,
     )
-    
+
     trainer.train()
     trainer.save_model(args.output_dir)
 
